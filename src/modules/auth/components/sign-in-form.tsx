@@ -32,7 +32,7 @@ export function SignInForm({
   inAuthScreen?: boolean;
 }) {
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
-    undefined
+    undefined,
   );
   const [isLoading, setIsLoading] = useState(false);
 
@@ -60,7 +60,7 @@ export function SignInForm({
             setErrorMessage(undefined);
             window.location.href = "/";
           },
-        }
+        },
       );
 
       setIsLoading(false);
@@ -86,9 +86,8 @@ export function SignInForm({
             className="flex flex-col gap-4"
           >
             <FieldGroup>
-              <form.Field
-                name="email"
-                children={(field) => {
+              <form.Field name="email">
+                {(field) => {
                   const isInvalid =
                     field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
@@ -111,11 +110,10 @@ export function SignInForm({
                     </Field>
                   );
                 }}
-              />
+              </form.Field>
 
-              <form.Field
-                name="password"
-                children={(field) => {
+              <form.Field name="password">
+                {(field) => {
                   const isInvalid =
                     field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
@@ -139,7 +137,7 @@ export function SignInForm({
                     </Field>
                   );
                 }}
-              />
+              </form.Field>
             </FieldGroup>
 
             <Button type="submit" disabled={isLoading}>
@@ -148,7 +146,7 @@ export function SignInForm({
           </form>
 
           <CardDescription className="mt-4">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/sign-up" className="underline">
               Sign Up
             </Link>

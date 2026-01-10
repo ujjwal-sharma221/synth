@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
 
 import "./globals.css";
+import { Provider } from "@/providers/providers";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -27,8 +28,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${geistMono.variable} antialiased`}>
-        {children}
-        <Toaster position="top-right" richColors />
+        <Provider>{children}</Provider>
+        <Toaster position="top-right" closeButton />
       </body>
     </html>
   );
