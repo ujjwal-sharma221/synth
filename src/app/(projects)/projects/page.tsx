@@ -1,5 +1,5 @@
 import { ensureAuthenticated } from "@/modules/auth/functions";
-import { ProjectView } from "@/modules/project/components/project-view";
+import { ProjectView } from "@/modules/projects/components/project-view";
 
 const Page = async () => {
   await ensureAuthenticated();

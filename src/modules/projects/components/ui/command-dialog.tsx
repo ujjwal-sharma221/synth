@@ -8,8 +8,8 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { useGetProjects } from "../../hooks/use-project";
 import { getProjectIcon } from "./project-item";
+import { useGetProjects } from "../../hooks/use-project";
 
 interface ProjectCommandDialogProps {
   open: boolean;
