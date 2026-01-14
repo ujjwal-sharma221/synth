@@ -1,13 +1,6 @@
-import {
-  BoltIcon,
-  BookOpenIcon,
-  CircleUserRoundIcon,
-  Layers2Icon,
-  LogOutIcon,
-  PinIcon,
-  UserPenIcon,
-} from "lucide-react";
+import { CircleUserRoundIcon, LogOutIcon } from "lucide-react";
 
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,9 +10,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { authClient } from "@/lib/auth-client";
-import { cn } from "@/lib/utils";
 import { Skeleton } from "./ui/skeleton";
+import { authClient } from "@/lib/auth-client";
 
 export function UserAvatar({ isDarkMode }: { isDarkMode?: boolean }) {
   const session = authClient.useSession();
@@ -41,12 +33,7 @@ export function UserAvatar({ isDarkMode }: { isDarkMode?: boolean }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          aria-label="Open account menu"
-          size="icon"
-          variant="outline"
-          className={cn(isDarkMode && "text-white bg-black border-none")}
-        >
+        <Button aria-label="Open account menu" size="icon" variant="secondary">
           <CircleUserRoundIcon aria-hidden="true" size={16} />
         </Button>
       </DropdownMenuTrigger>
@@ -77,7 +64,7 @@ const UserAvatarSkeleton = ({ isDarkMode }: { isDarkMode?: boolean }) => {
     <div
       className={cn(
         "flex h-9 w-9 items-center justify-center rounded-md border",
-        isDarkMode && "border-white/20",
+        isDarkMode && "border-white/20"
       )}
     >
       <Skeleton className="h-5 w-5 rounded-full" />

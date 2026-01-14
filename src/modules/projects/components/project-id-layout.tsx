@@ -20,7 +20,7 @@ type LayoutProps = PropsWithChildren<{
 
 export function ProjectIdLayout({ projectId, children }: LayoutProps) {
   return (
-    <div className="bg-[#1F1F1F] text-[#E5E5E5] w-full h-screen flex flex-col">
+    <div className="bg-background text-foreground w-full h-screen flex flex-col">
       <Navbar projectId={projectId} />
       <div className="flex-1 flex overflow-hidden">
         <Allotment
