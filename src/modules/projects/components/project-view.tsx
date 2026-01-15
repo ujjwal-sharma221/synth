@@ -61,7 +61,7 @@ export function ProjectView() {
         <div className="max-w-sm w-full mx-auto flex flex-col gap-4 items-center">
           <div className="flex justify-between gap-4 w-full items-center">
             <div className="flex items-center gap-2 w-full group/logo">
-              <Logo height={32} width={32} />
+              <Logo isDarkMode height={32} width={32} />
               <h1 className={cn("text-4xl md:text-5xl font-semibold ")}>
                 Synth
               </h1>

@@ -177,7 +177,7 @@ export const renameFile = mutation({
       (sibling) =>
         sibling.name === args.name &&
         sibling.type === file.type &&
-        file._id !== args.id
+        sibling._id !== args.id
     );
 
     if (existingFile) {

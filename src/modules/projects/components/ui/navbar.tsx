@@ -24,7 +24,7 @@ import { formatDistanceToNow } from "date-fns";
 
 export function Navbar({ projectId }: { projectId: Id<"projects"> }) {
   const project = useGetProjectById(projectId);
-  const renameProject = useRenameProject(projectId);
+  const renameProject = useRenameProject();
 
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState("");
@@ -65,7 +65,7 @@ export function Navbar({ projectId }: { projectId: Id<"projects"> }) {
                   asChild
                 >
                   <Link href="/projects" className="space-x-1">
-                    <Logo height={15} width={15} />
+                    <Logo height={15} width={15} isDarkMode />
                     <span className="text-sm font-medium">projects</span>
                   </Link>
                 </Button>

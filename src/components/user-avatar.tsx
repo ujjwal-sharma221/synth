@@ -63,8 +63,7 @@ const UserAvatarSkeleton = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   return (
     <div
       className={cn(
-        "flex h-9 w-9 items-center justify-center rounded-md border",
-        isDarkMode && "border-white/20"
+        "flex h-9 w-9 items-center justify-center rounded-md border"
       )}
     >
       <Skeleton className="h-5 w-5 rounded-full" />
