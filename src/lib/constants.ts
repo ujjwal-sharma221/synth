@@ -6,3 +6,5 @@ export const DEFAULT_CONVERSATION_SIDEBAR_WIDTH = 400;
 
 export const BASE_PADDING = 12;
 export const LEVEL_PADDING = 12;
+
+export const DEBOUNCE_TIME_MS = 1500;
