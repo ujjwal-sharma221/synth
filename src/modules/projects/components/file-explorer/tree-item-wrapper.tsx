@@ -41,7 +41,8 @@ export function TreeItemWrapper({
       <ContextMenuTrigger asChild className="">
         <button
           className={cn(
-            "group flex items-center gap-1 w-full h-[22px] hover:bg-sidebar-accent outline-none focus:ring-1 focus:ring-sidebar-ring focus:ring-inset text-sidebar-foreground cursor-pointer"
+            "group flex items-center gap-1 w-full h-[22px] hover:bg-sidebar-accent outline-none focus:ring-1 focus:ring-sidebar-ring focus:ring-inset text-sidebar-foreground cursor-pointer",
+            isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
           )}
           style={{
             paddingLeft: getItemPadding({

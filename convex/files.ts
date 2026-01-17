@@ -1,7 +1,7 @@
 import { ConvexError, v } from "convex/values";
 
 import { isAuthenticated } from "./auth";
-import { Id } from "./_generated/dataModel";
+import { Doc, Id } from "./_generated/dataModel";
 import { mutation, MutationCtx, query } from "./_generated/server";
 
 export const getFiles = query({
@@ -54,7 +54,7 @@ export const getFolderContents = query({
     const files = await ctx.db
       .query("files")
       .withIndex("by_project_parent", (q) =>
-        q.eq("projectId", args.projectId).eq("parentId", args.parentId)
+        q.eq("projectId", args.projectId).eq("parentId", args.parentId),
       )
       .collect();
 
@@ -87,12 +87,12 @@ export const createFile = mutation({
     const files = await ctx.db
       .query("files")
       .withIndex("by_project_parent", (q) =>
-        q.eq("projectId", args.projectId).eq("parentId", args.parentId)
+        q.eq("projectId", args.projectId).eq("parentId", args.parentId),
       )
       .collect();
 
     const existingFile = files.find(
-      (file) => file.name === args.name && file.type === "file"
+      (file) => file.name === args.name && file.type === "file",
     );
     if (existingFile) throw new ConvexError("File Already Exists");
 
@@ -129,12 +129,12 @@ export const createFolder = mutation({
     const folders = await ctx.db
       .query("files")
       .withIndex("by_project_parent", (q) =>
-        q.eq("projectId", args.projectId).eq("parentId", args.parentId)
+        q.eq("projectId", args.projectId).eq("parentId", args.parentId),
       )
       .collect();
 
     const existingFolder = folders.find(
-      (folder) => folder.name === args.name && folder.type === "folder"
+      (folder) => folder.name === args.name && folder.type === "folder",
     );
     if (existingFolder) throw new ConvexError("Folder Already Exists");
 
@@ -169,7 +169,7 @@ export const renameFile = mutation({
     const siblings = await ctx.db
       .query("files")
       .withIndex("by_project_parent", (q) =>
-        q.eq("projectId", file.projectId).eq("parentId", file.parentId)
+        q.eq("projectId", file.projectId).eq("parentId", file.parentId),
       )
       .collect();
 
@@ -177,12 +177,12 @@ export const renameFile = mutation({
       (sibling) =>
         sibling.name === args.name &&
         sibling.type === file.type &&
-        sibling._id !== args.id
+        sibling._id !== args.id,
     );
 
     if (existingFile) {
       throw new ConvexError(
-        `A ${file.type} with this name already exist in this location`
+        `A ${file.type} with this name already exist in this location`,
       );
     }
 
@@ -212,7 +212,7 @@ async function deleteRecursive({
     const children = await ctx.db
       .query("files")
       .withIndex("by_project_parent", (q) =>
-        q.eq("projectId", item.projectId).eq("parentId", item._id)
+        q.eq("projectId", item.projectId).eq("parentId", item._id),
       )
       .collect();
 
@@ -277,5 +277,37 @@ export const updateFile = mutation({
     await ctx.db.patch("projects", file.projectId, {
       updatedAt: now,
     });
+  },
+});
+
+export const getFilePath = query({
+  args: { id: v.id("files") },
+  handler: async (ctx, args) => {
+    const identity = await isAuthenticated(ctx);
+
+    const file = await ctx.db.get("files", args.id);
+    if (!file) throw new ConvexError("File Not Found");
+
+    const project = await ctx.db.get("projects", file.projectId);
+    if (!project) throw new ConvexError("Project Not Found");
+
+    if (project.ownerId !== identity.subject)
+      throw new ConvexError("Unauthorized to access this project");
+
+    const path: { _id: Id<"files">; name: string }[] = [];
+    let currentId: Id<"files"> | undefined = args.id;
+
+    while (currentId) {
+      const file = (await ctx.db.get("files", currentId)) as
+        | Doc<"files">
+        | undefined;
+
+      if (!file) break;
+
+      path.unshift({ _id: file._id, name: file.name });
+      currentId = file.parentId;
+    }
+
+    return path;
   },
 });

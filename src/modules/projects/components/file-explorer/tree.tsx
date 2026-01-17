@@ -15,6 +15,7 @@ import { LoadingRow } from "./loading-row";
 import { CreateInput } from "./create-input";
 import { RenameInput } from "./rename-input";
 import { TreeItemWrapper } from "./tree-item-wrapper";
+import { useEditor } from "@/modules/editor/hooks/use-editor";
 import { Doc, Id } from "../../../../../convex/_generated/dataModel";
 
 interface TreeProps {
@@ -32,6 +33,8 @@ export function Tree({ level = 0, item, projectId }: TreeProps) {
   const deleteFile = useDeleteFile();
   const createFile = useCreateFile();
   const createFolder = useCreateFolder();
+
+  const { openFile, closeTab, activeTabId } = useEditor(projectId);
 
   const folderContents = useFolderContents({
     projectId,
@@ -57,6 +60,8 @@ export function Tree({ level = 0, item, projectId }: TreeProps) {
   const fileName = item.name;
 
   if (item.type === "file") {
+    const isActive = activeTabId === item._id;
+
     if (isRenaming) {
       return (
         <RenameInput
@@ -74,11 +79,16 @@ export function Tree({ level = 0, item, projectId }: TreeProps) {
       <TreeItemWrapper
         item={item}
         level={level}
-        isActive={false}
-        onClick={() => {}}
-        onDoubleClick={() => {}}
+        isActive={isActive}
+        onClick={() =>
+          openFile({ fileId: item._id, options: { pinned: false } })
+        }
+        onDoubleClick={() =>
+          openFile({ fileId: item._id, options: { pinned: true } })
+        }
         onRename={() => setIsRenaming(true)}
         onDelete={() => {
+          closeTab(item._id);
           deleteFile({ id: item._id });
         }}
       >
@@ -95,7 +105,7 @@ export function Tree({ level = 0, item, projectId }: TreeProps) {
         <ChevronRightIcon
           className={cn(
             "size-4 shrink-0 text-muted-foreground",
-            isOpen && "rotate-90"
+            isOpen && "rotate-90",
           )}
         />
         <FolderIcon folderName={folderName} className="size-4" />

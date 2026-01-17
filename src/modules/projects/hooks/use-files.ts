@@ -24,7 +24,7 @@ export const useFolderContents = ({
 }: FolderContentProps) => {
   return useQuery(
     api.files.getFolderContents,
-    enabled ? { projectId, parentId } : "skip"
+    enabled ? { projectId, parentId } : "skip",
   );
 };
 
@@ -34,4 +34,12 @@ export const useRenameFile = () => {
 
 export const useDeleteFile = () => {
   return useMutation(api.files.deleteFile);
+};
+
+export const useGetFile = (fileId: Id<"files"> | null) => {
+  return useQuery(api.files.getFile, fileId ? { id: fileId } : "skip");
+};
+
+export const useGetFilePath = (fileId: Id<"files"> | null) => {
+  return useQuery(api.files.getFilePath, fileId ? { id: fileId } : "skip");
 };

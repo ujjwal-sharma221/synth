@@ -12,9 +12,10 @@ import {
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { Id } from "../../../../convex/_generated/dataModel";
+import { FileExplorer } from "./file-explorer/file-explorer";
+import { EditorView } from "@/modules/editor/components/editor-view";
 
 import "allotment/dist/style.css";
-import { FileExplorer } from "./file-explorer/file-explorer";
 
 export function ProjectIdView({ projectId }: { projectId: Id<"projects"> }) {
   const [activeTab, setActiveTab] = useState<"editor" | "preview">("editor");
@@ -45,7 +46,7 @@ export function ProjectIdView({ projectId }: { projectId: Id<"projects"> }) {
         <div
           className={cn(
             "absolute inset-0",
-            activeTab === "editor" ? "visible" : "invisible"
+            activeTab === "editor" ? "visible" : "invisible",
           )}
         >
           <Allotment defaultSizes={[DEFAULT_SIDEBAR_WIDTH, DEFAULT_MAIN_SIZE]}>
@@ -58,7 +59,7 @@ export function ProjectIdView({ projectId }: { projectId: Id<"projects"> }) {
               <FileExplorer projectId={projectId} />
             </Allotment.Pane>
             <Allotment.Pane>
-              <p>Editor View</p>
+              <EditorView projectId={projectId} />
             </Allotment.Pane>
           </Allotment>
         </div>
@@ -66,7 +67,7 @@ export function ProjectIdView({ projectId }: { projectId: Id<"projects"> }) {
         <div
           className={cn(
             "absolute inset-0",
-            activeTab === "preview" ? "visible" : "invisible"
+            activeTab === "preview" ? "visible" : "invisible",
           )}
         >
           <div>Preview</div>
@@ -90,7 +91,7 @@ const Tab = ({
       onClick={onClick}
       className={cn(
         "flex items-center px-4 cursor-pointer h-full gap-2 border-r border-border hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors bg-sidebar text-muted-foreground font-medium",
-        isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
+        isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
       )}
     >
       <span className="text-xs">{label}</span>

@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { useState } from "react";
+import { formatDistanceToNow } from "date-fns";
+import { CloudCheckIcon, LoaderIcon } from "lucide-react";
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,13 +21,6 @@ import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user-avatar";
 import { Id } from "../../../../../convex/_generated/dataModel";
 import { useGetProjectById, useRenameProject } from "../../hooks/use-project";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { CloudCheckIcon, LoaderIcon } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 
 export function Navbar({ projectId }: { projectId: Id<"projects"> }) {
   const project = useGetProjectById(projectId);
