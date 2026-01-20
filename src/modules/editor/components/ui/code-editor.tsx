@@ -7,8 +7,11 @@ import { keymap } from "@codemirror/view";
 import { minimap } from "../../extensions/minimap";
 import { customTheme } from "../../extensions/theme";
 import { indentWithTab } from "@codemirror/commands";
+import { quickEdit } from "../../extensions/quick-edit";
+import { suggestions } from "../../extensions/suggestions";
 import { customSetup } from "../../extensions/custom-setup";
 import { getLanguageExtension } from "../../extensions/language";
+import { selectionTooltip } from "../../extensions/selection-tooltip";
 import { indentationMarkers } from "@replit/codemirror-indentation-markers";
 import { catppuccinMocha } from "@fsegurai/codemirror-theme-catppuccin-mocha";
 
@@ -40,6 +43,9 @@ export function CodeEditor({
         languageExtension,
         catppuccinMocha,
         customTheme,
+        suggestions(fileName),
+        quickEdit(fileName),
+        selectionTooltip(),
         keymap.of([indentWithTab]),
         minimap(),
         indentationMarkers(),

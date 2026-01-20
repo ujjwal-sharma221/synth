@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import { Logo } from "@/components/logo";
 import { CodeEditor } from "./ui/code-editor";
@@ -17,6 +17,14 @@ export function EditorView({ projectId }: { projectId: Id<"projects"> }) {
 
   const isActiveBinary = activeFile && activeFile.storageId;
   const isActiveTextFile = activeFile && !activeFile.storageId;
+
+  useEffect(() => {
+    return () => {
+      if (timeOutRef.current) {
+        clearTimeout(timeOutRef.current);
+      }
+    };
+  }, [activeTabId]);
 
   return (
     <div className="h-full flex flex-col">
