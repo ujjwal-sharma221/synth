@@ -31,3 +31,10 @@ export const isAuthenticated = async (ctx: QueryCtx | MutationCtx) => {
 
   return identity;
 };
+
+export const validateInternalKey = (key: string) => {
+  const internalKey = process.env.CONVEX_INTERNAL_KEY;
+  if (!internalKey) throw new ConvexError("Internal Key Not Found");
+
+  if (key !== internalKey) throw new ConvexError("Invalid Internal Key");
+};
