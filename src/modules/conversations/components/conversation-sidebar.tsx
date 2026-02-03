@@ -77,6 +77,7 @@ export function ConversationSidebar({
 
   const handleSubmit = async (message: PromptInputMessage) => {
     if (isProcessing && !message.text) {
+      await handleCancel();
       setInput("");
       return;
     }
@@ -99,6 +100,18 @@ export function ConversationSidebar({
     }
 
     setInput("");
+  };
+
+  const handleCancel = async () => {
+    try {
+      await ky.post("/api/messages/cancel", {
+        json: {
+          projectId,
+        },
+      });
+    } catch (error) {
+      toast.error("Failed to cancel message");
+    }
   };
 
   return (
@@ -129,6 +142,10 @@ export function ConversationSidebar({
               <MessageContent>
                 {message.status === "processing" ? (
                   <span className="animate-pulse">...</span>
+                ) : message.status === "cancelled" ? (
+                  <span className="text-muted-foreground italic">
+                    Cancelled
+                  </span>
                 ) : (
                   <MessageResponse>{message.content}</MessageResponse>
                 )}
