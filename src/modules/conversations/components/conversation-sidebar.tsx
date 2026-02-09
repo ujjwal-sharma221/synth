@@ -16,11 +16,7 @@ import {
   MessageContent,
   MessageResponse,
 } from "@/components/ai-elements/message";
-import {
-  Conversation,
-  ConversationContent,
-  ConversationScrollButton,
-} from "@/components/ai-elements/conversation";
+
 import {
   PromptInput,
   PromptInputBody,
@@ -30,10 +26,16 @@ import {
   PromptInputTextarea,
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
+import {
+  Conversation,
+  ConversationContent,
+  ConversationScrollButton,
+} from "@/components/ai-elements/conversation";
 import { Button } from "@/components/ui/button";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { DEFAULT_CONVERSATION_TITLE } from "../../../../convex/constants";
 import ky from "ky";
+import { PastConversationsDialog } from "./past-conversations";
 
 export function ConversationSidebar({
   projectId,
@@ -46,6 +48,8 @@ export function ConversationSidebar({
   const [selectedConversationId, setSelectedConversationId] =
     useState<Id<"conversations"> | null>(null);
   const [input, setInput] = useState("");
+  const [isPastConvesationsDialogOpen, setIsPastConvesationsDialogOpen] =
+    useState(false);
 
   const activeConversationId =
     selectedConversationId ?? conversations?.[0]?._id ?? null;
@@ -115,83 +119,96 @@ export function ConversationSidebar({
   };
 
   return (
-    <div className="flex flex-col h-full bg-sidebar">
-      <div className="h-8.75 flex items-center justify-between border-b">
-        <div className="text-sm truncate pl-3">
-          {activeConversation?.title ?? DEFAULT_CONVERSATION_TITLE}
+    <>
+      <PastConversationsDialog
+        projectId={projectId}
+        open={isPastConvesationsDialogOpen}
+        onOpenChange={setIsPastConvesationsDialogOpen}
+        onSelect={setSelectedConversationId}
+      />
+
+      <div className="flex flex-col h-full bg-sidebar">
+        <div className="h-8.75 flex items-center justify-between border-b">
+          <div className="text-sm truncate pl-3">
+            {activeConversation?.title ?? DEFAULT_CONVERSATION_TITLE}
+          </div>
+
+          <div className="flex items-center px-1 gap-1">
+            <Button
+              size="icon-xs"
+              variant="highlight"
+              onClick={() => setIsPastConvesationsDialogOpen(true)}
+            >
+              <HistoryIcon className="size-3.5" />
+            </Button>
+            <Button
+              size="icon-xs"
+              variant="highlight"
+              onClick={handleCreateConversation}
+            >
+              <PlusIcon className="size-3.5" />
+            </Button>
+          </div>
         </div>
 
-        <div className="flex items-center px-1 gap-1">
-          <Button size="icon-xs" variant="highlight">
-            <HistoryIcon className="size-3.5" />
-          </Button>
-          <Button
-            size="icon-xs"
-            variant="highlight"
-            onClick={handleCreateConversation}
-          >
-            <PlusIcon className="size-3.5" />
-          </Button>
+        <Conversation className="flex-1">
+          <ConversationContent>
+            {messages?.map((message, i) => (
+              <Message key={message._id} from={message.role}>
+                <MessageContent>
+                  {message.status === "processing" ? (
+                    <span className="animate-pulse">...</span>
+                  ) : message.status === "cancelled" ? (
+                    <span className="text-muted-foreground italic">
+                      Cancelled
+                    </span>
+                  ) : (
+                    <MessageResponse>{message.content}</MessageResponse>
+                  )}
+                </MessageContent>
+
+                {message.role === "assistant" &&
+                  message.status == "completed" &&
+                  i === (messages.length ?? 0) - 1 && (
+                    <MessageActions>
+                      <MessageAction
+                        onClick={() =>
+                          navigator.clipboard.writeText(message.content)
+                        }
+                        label="Copy"
+                      >
+                        <CopyIcon />
+                      </MessageAction>
+                    </MessageActions>
+                  )}
+              </Message>
+            ))}
+          </ConversationContent>
+          <ConversationScrollButton />
+        </Conversation>
+
+        <div className="p-3">
+          <PromptInput onSubmit={handleSubmit} className="mt-2">
+            <PromptInputBody>
+              <PromptInputTextarea
+                placeholder="Ask a question or start a conversation"
+                onChange={(e) => setInput(e.target.value)}
+                value={input}
+                disabled={isProcessing}
+              />
+            </PromptInputBody>
+
+            <PromptInputFooter>
+              <PromptInputTools />
+              <PromptInputSubmit
+                type="submit"
+                disabled={isProcessing ? false : !input}
+                status={isProcessing ? "streaming" : undefined}
+              />
+            </PromptInputFooter>
+          </PromptInput>
         </div>
       </div>
-
-      <Conversation className="flex-1">
-        <ConversationContent>
-          {messages?.map((message, i) => (
-            <Message key={message._id} from={message.role}>
-              <MessageContent>
-                {message.status === "processing" ? (
-                  <span className="animate-pulse">...</span>
-                ) : message.status === "cancelled" ? (
-                  <span className="text-muted-foreground italic">
-                    Cancelled
-                  </span>
-                ) : (
-                  <MessageResponse>{message.content}</MessageResponse>
-                )}
-              </MessageContent>
-
-              {message.role === "assistant" &&
-                message.status == "completed" &&
-                i === (messages.length ?? 0) - 1 && (
-                  <MessageActions>
-                    <MessageAction
-                      onClick={() =>
-                        navigator.clipboard.writeText(message.content)
-                      }
-                      label="Copy"
-                    >
-                      <CopyIcon />
-                    </MessageAction>
-                  </MessageActions>
-                )}
-            </Message>
-          ))}
-        </ConversationContent>
-        <ConversationScrollButton />
-      </Conversation>
-
-      <div className="p-3">
-        <PromptInput onSubmit={handleSubmit} className="mt-2">
-          <PromptInputBody>
-            <PromptInputTextarea
-              placeholder="Ask a question or start a conversation"
-              onChange={(e) => setInput(e.target.value)}
-              value={input}
-              disabled={isProcessing}
-            />
-          </PromptInputBody>
-
-          <PromptInputFooter>
-            <PromptInputTools />
-            <PromptInputSubmit
-              type="submit"
-              disabled={isProcessing ? false : !input}
-              status={isProcessing ? "streaming" : undefined}
-            />
-          </PromptInputFooter>
-        </PromptInput>
-      </div>
-    </div>
+    </>
   );
 }

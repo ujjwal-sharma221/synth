@@ -38,6 +38,33 @@ export async function POST(req: Request) {
 
   const projectId = conversation.projectId;
 
+  const processingMessages = await convexClient.query(
+    api.system.getProcessingMessages,
+    {
+      internalKey: process.env.CONVEX_INTERNAL_KEY!,
+      projectId,
+    },
+  );
+
+  if (processingMessages.length > 0) {
+    await Promise.all(
+      processingMessages.map(async (msg) => {
+        await inngest.send({
+          name: "message/cancel",
+          data: {
+            messageId: msg._id,
+          },
+        });
+
+        await convexClient.mutation(api.system.updateMessageStatus, {
+          internalKey: process.env.CONVEX_INTERNAL_KEY!,
+          messageId: msg._id,
+          status: "cancelled",
+        });
+      }),
+    );
+  }
+
   await convexClient.mutation(api.system.createMessage, {
     internalKey: process.env.CONVEX_INTERNAL_KEY!,
     projectId,
@@ -62,6 +89,9 @@ export async function POST(req: Request) {
     name: "message/sent",
     data: {
       messageId: assistantMessageId,
+      conversationId,
+      projectId,
+      message,
     },
   });
 

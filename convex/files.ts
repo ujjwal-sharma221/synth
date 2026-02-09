@@ -197,7 +197,7 @@ export const renameFile = mutation({
   },
 });
 
-async function deleteRecursive({
+export async function deleteRecursive({
   fileId,
   ctx,
 }: {
