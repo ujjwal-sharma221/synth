@@ -200,7 +200,10 @@ export const createFile = mutation({
       .collect();
 
     const existingFile = files.find(
-      (file) => file.name && file.type === "file",
+      (file) =>
+        file.name === args.name &&
+        file.type === "file" &&
+        file.parentId === args.parentId,
     );
     if (existingFile) {
       throw new ConvexError("File already exists");
@@ -244,7 +247,10 @@ export const createFiles = mutation({
 
     for (const file of args.files) {
       const existingFile = existingFiles.find(
-        (f) => f.name && f.type === "file",
+        (f) =>
+          f.name === file.name &&
+          f.type === "file" &&
+          f.parentId === args.parentId,
       );
 
       if (existingFile) {
@@ -291,7 +297,10 @@ export const createFolder = mutation({
       .collect();
 
     const existingFolder = folders.find(
-      (folder) => folder.name && folder.type === "folder",
+      (folder) =>
+        folder.name === args.name &&
+        folder.type === "folder" &&
+        folder.parentId === args.parentId,
     );
 
     if (existingFolder) {

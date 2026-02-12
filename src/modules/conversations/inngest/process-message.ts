@@ -1,14 +1,21 @@
 import { NonRetriableError } from "inngest";
-import { createAgent, gemini, openai, createTool } from "@inngest/agent-kit";
-import { groq } from "./groq-model-provider";
+import { createAgent, createNetwork } from "@inngest/agent-kit";
 
 import {
   CODING_AGENT_SYSTEM_PROMPT,
   CONVERSATION_TITLE_AGENT_SYSTEM_PROMPT,
 } from "./constants";
 import { inngest } from "@/inngest/client";
+import { groq } from "./groq-model-provider";
+import { listFiles } from "./tools/list-files";
+import { readFileTool } from "./tools/read-file";
 import { convexClient } from "@/lib/convex-client";
+import { createFilesTool } from "./tools/create-files";
 import { api } from "../../../../convex/_generated/api";
+import { createFolderTool } from "./tools/create-folder";
+import { createUpdateFileTool } from "./tools/update-files";
+import { deleteFileTool } from "./tools/delete-file";
+import { renameFileTool } from "./tools/rename-file";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { DEFAULT_CONVERSATION_TITLE } from "../../../../convex/constants";
 
@@ -76,11 +83,11 @@ export const processMessage = inngest.createFunction(
       });
     });
 
-    let systemPrompt = CODING_AGENT_SYSTEM_PROMPT;
-
     const contextMessages = recentMessages.filter(
       (msg) => msg._id !== messageId && msg.content.trim() !== "",
     );
+
+    let systemPrompt = CODING_AGENT_SYSTEM_PROMPT;
 
     if (contextMessages.length > 0) {
       const historyText = contextMessages
@@ -129,12 +136,81 @@ export const processMessage = inngest.createFunction(
       }
     }
 
+    const codingAgent = createAgent({
+      name: "synth",
+      description: "Expert ai coding agent",
+      system: systemPrompt,
+      model: groq({
+        model: "openai/gpt-oss-120b",
+        apiKey: process.env.GROQ_API_KEY!,
+      }),
+
+      tools: [
+        listFiles({ internalKey, projectId }),
+        readFileTool({ internalKey }),
+        createUpdateFileTool({ internalKey }),
+        renameFileTool({ internalKey }),
+        deleteFileTool({ internalKey }),
+        createFilesTool({ internalKey, projectId }),
+        createFilesTool({ internalKey, projectId }),
+        createFolderTool({ internalKey, projectId }),
+      ],
+    });
+
+    const network = createNetwork({
+      name: "synth-network",
+      agents: [codingAgent],
+      maxIter: 20,
+      router: ({ network }) => {
+        const lastResult = network.state.results.at(-1);
+
+        if (!lastResult) {
+          return codingAgent;
+        }
+
+        const hasText = lastResult.output.some(
+          (m) => m.type === "text" && m.role === "assistant",
+        );
+
+        const hasToolCallOrResult = lastResult.output.some(
+          (m) => m.type === "tool_call" || m.type === "tool_result",
+        );
+
+        if (hasText || !hasToolCallOrResult) {
+          return undefined;
+        }
+
+        return codingAgent;
+      },
+    });
+
+    const result = await network.run(message);
+
+    const lastResult = result.state.results.at(-1);
+
+    const textMessage = lastResult?.output.find(
+      (m) => m.type === "text" && m.role === "assistant",
+    );
+
+    console.log("TEXT_MESSAGE", textMessage);
+
+    let defaultResponse = "Your request is processed successfully";
+
+    if (textMessage?.type === "text") {
+      defaultResponse =
+        typeof textMessage.content === "string"
+          ? textMessage.content
+          : textMessage.content.map((c) => c.text).join("");
+    }
+
     await step.run("update-assisstant-message", async () => {
       await convexClient.mutation(api.system.updateMessageContent, {
         internalKey,
         messageId,
-        content: "AI processed this message",
+        content: defaultResponse,
       });
     });
+
+    return { success: true, messageId, conversationId };
   },
 );
