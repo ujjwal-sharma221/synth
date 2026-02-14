@@ -3,6 +3,33 @@ import { mutation, query } from "./_generated/server";
 
 import { isAuthenticated } from "./auth";
 
+export const updateSettings = mutation({
+  args: {
+    id: v.id("projects"),
+    settings: v.object({
+      installCommand: v.optional(v.string()),
+      devCommand: v.optional(v.string()),
+    }),
+  },
+
+  handler: async (ctx, args) => {
+    const identity = await isAuthenticated(ctx);
+
+    const project = await ctx.db.get("projects", args.id);
+    if (!project) throw new ConvexError("Project Not Found");
+
+    if (project.ownerId !== identity.subject)
+      throw new ConvexError("Unauthorized to access this project");
+
+    await ctx.db.patch("projects", args.id, {
+      settings: args.settings,
+      updatedAt: Date.now(),
+    });
+
+    return project;
+  },
+});
+
 export const create = mutation({
   args: { name: v.string() },
   handler: async (ctx, args) => {

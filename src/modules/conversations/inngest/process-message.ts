@@ -10,7 +10,7 @@ import { groq } from "./groq-model-provider";
 import { listFiles } from "./tools/list-files";
 import { readFileTool } from "./tools/read-file";
 import { convexClient } from "@/lib/convex-client";
-import { createFilesTool } from "./tools/create-files";
+import { createFileTool, createFilesTool } from "./tools/create-files";
 import { api } from "../../../../convex/_generated/api";
 import { createFolderTool } from "./tools/create-folder";
 import { createUpdateFileTool } from "./tools/update-files";
@@ -152,7 +152,7 @@ export const processMessage = inngest.createFunction(
         renameFileTool({ internalKey }),
         deleteFileTool({ internalKey }),
         createFilesTool({ internalKey, projectId }),
-        createFilesTool({ internalKey, projectId }),
+        createFileTool({ internalKey, projectId }),
         createFolderTool({ internalKey, projectId }),
       ],
     });

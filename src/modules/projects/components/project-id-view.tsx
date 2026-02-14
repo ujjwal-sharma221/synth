@@ -16,6 +16,7 @@ import { FileExplorer } from "./file-explorer/file-explorer";
 import { EditorView } from "@/modules/editor/components/editor-view";
 
 import "allotment/dist/style.css";
+import { PreviewView } from "./preview-view";
 
 export function ProjectIdView({ projectId }: { projectId: Id<"projects"> }) {
   const [activeTab, setActiveTab] = useState<"editor" | "preview">("editor");
@@ -70,7 +71,7 @@ export function ProjectIdView({ projectId }: { projectId: Id<"projects"> }) {
             activeTab === "preview" ? "visible" : "invisible",
           )}
         >
-          <div>Preview</div>
+          <PreviewView projectId={projectId} />
         </div>
       </div>
     </div>

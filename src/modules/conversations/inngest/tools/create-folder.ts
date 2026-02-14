@@ -11,7 +11,7 @@ interface CreateFolderToolOptions {
 }
 
 const paramSchema = z.object({
-  parentId: z.string(),
+  parentId: z.string().nullable(),
   name: z.string(),
 });
 
@@ -26,8 +26,9 @@ export function createFolderTool({
     parameters: z.object({
       parentId: z
         .string()
+        .nullable()
         .describe(
-          "Parent folder ID. Use empty folder id for root level. Must be a valid folder id from listFiles tool",
+          "Parent folder ID. Use empty string or null for root level. Must be a valid folder id from listFiles tool",
         ),
       name: z.string().describe("the folder name"),
     }),
@@ -40,25 +41,26 @@ export function createFolderTool({
       }
 
       const { name, parentId } = parsed.data;
+      const normalizedParentId = parentId ?? "";
 
       return await toolStep?.run("create-folder", async () => {
         let resolvedParentId: Id<"files"> | undefined;
 
-        if (parentId !== "") {
+        if (normalizedParentId !== "") {
           const parentFolder = await convexClient.query(api.system.getFileById, {
             internalKey,
-            fileId: parentId as Id<"files">,
+            fileId: normalizedParentId as Id<"files">,
           });
 
           if (!parentFolder) {
-            return `Error, parent folder with id ${parentId} not found. Use listFiles to get valid folderIds`;
+            return `Error, parent folder with id ${normalizedParentId} not found. Use listFiles to get valid folderIds`;
           }
 
           if (parentFolder.type !== "folder") {
-            return `Error, parent folder with id ${parentId} is not a folder. Use listFiles to get valid folderIds`;
+            return `Error, parent folder with id ${normalizedParentId} is not a folder. Use listFiles to get valid folderIds`;
           }
 
-          resolvedParentId = parentId as Id<"files">;
+          resolvedParentId = normalizedParentId as Id<"files">;
         }
 
         try {

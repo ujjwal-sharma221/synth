@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "dev:all": "concurrently 'pnpm dev' 'pnpx convex dev' 'pnpm dlx inngest-cli@latest dev'"
   },
   "dependencies": {
     "@ai-sdk/cerebras": "^2.0.14",
@@ -57,6 +58,9 @@
     "@streamdown/math": "^1.0.1",
     "@streamdown/mermaid": "^1.0.1",
     "@tanstack/react-form": "^1.27.7",
+    "@webcontainer/api": "^1.6.1",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
     "@xyflow/react": "^12.10.0",
     "ai": "^6.0.25",
     "allotment": "^1.20.5",

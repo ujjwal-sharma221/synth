@@ -20,6 +20,12 @@ export default defineSchema({
       ),
     ),
     exportRepoUrl: v.optional(v.string()),
+    settings: v.optional(
+      v.object({
+        installCommand: v.optional(v.string()),
+        devCommand: v.optional(v.string()),
+      }),
+    ),
     updatedAt: v.number(),
   }).index("by_owner", ["ownerId"]),
 

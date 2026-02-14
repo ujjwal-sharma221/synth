@@ -11,13 +11,13 @@ interface CreateFilesToolOptions {
 }
 
 const singleFileParamSchema = z.object({
-  parentId: z.string(),
+  parentId: z.string().nullable(),
   name: z.string(),
   content: z.string(),
 });
 
 const paramSchema = z.object({
-  parentId: z.string(),
+  parentId: z.string().nullable(),
   files: z.array(z.object({ name: z.string(), content: z.string() })),
 });
 
@@ -33,8 +33,9 @@ export function createFilesTool({
     parameters: z.object({
       parentId: z
         .string()
+        .nullable()
         .describe(
-          "Parent folder ID. Use empty folder for root level. Must be a valid folder id from listFiles tool",
+          "Parent folder ID. Use empty string or null for root level. Must be a valid folder id from listFiles tool",
         ),
       files: z.array(
         z.object({
@@ -52,25 +53,26 @@ export function createFilesTool({
       }
 
       const { parentId, files } = parsed.data;
+      const normalizedParentId = parentId ?? "";
 
       return await toolStep?.run("create-files", async () => {
         let resolvedParentId: Id<"files"> | undefined;
 
-        if (parentId !== "") {
+        if (normalizedParentId !== "") {
           const parentFolder = await convexClient.query(api.system.getFileById, {
             internalKey,
-            fileId: parentId as Id<"files">,
+            fileId: normalizedParentId as Id<"files">,
           });
 
           if (!parentFolder) {
-            return `Error, parent folder with id ${parentId} not found. Use listFiles to get valid folderIds`;
+            return `Error, parent folder with id ${normalizedParentId} not found. Use listFiles to get valid folderIds`;
           }
 
           if (parentFolder.type !== "folder") {
-            return `Error, parent folder with id ${parentId} is not a folder. Use listFiles to get valid folderIds`;
+            return `Error, parent folder with id ${normalizedParentId} is not a folder. Use listFiles to get valid folderIds`;
           }
 
-          resolvedParentId = parentId as Id<"files">;
+          resolvedParentId = normalizedParentId as Id<"files">;
         }
 
         try {
@@ -111,8 +113,9 @@ export function createFileTool({ internalKey, projectId }: CreateFilesToolOption
     parameters: z.object({
       parentId: z
         .string()
+        .nullable()
         .describe(
-          "Parent folder ID. Use empty folder for root level. Must be a valid folder id from listFiles tool",
+          "Parent folder ID. Use empty string or null for root level. Must be a valid folder id from listFiles tool",
         ),
       name: z.string().describe("the file name including extension"),
       content: z.string().describe("the file content"),
@@ -125,25 +128,26 @@ export function createFileTool({ internalKey, projectId }: CreateFilesToolOption
       }
 
       const { parentId, name, content } = parsed.data;
+      const normalizedParentId = parentId ?? "";
 
       return await toolStep?.run("create-file", async () => {
         let resolvedParentId: Id<"files"> | undefined;
 
-        if (parentId !== "") {
+        if (normalizedParentId !== "") {
           const parentFolder = await convexClient.query(api.system.getFileById, {
             internalKey,
-            fileId: parentId as Id<"files">,
+            fileId: normalizedParentId as Id<"files">,
           });
 
           if (!parentFolder) {
-            return `Error, parent folder with id ${parentId} not found. Use listFiles to get valid folderIds`;
+            return `Error, parent folder with id ${normalizedParentId} not found. Use listFiles to get valid folderIds`;
           }
 
           if (parentFolder.type !== "folder") {
-            return `Error, parent folder with id ${parentId} is not a folder. Use listFiles to get valid folderIds`;
+            return `Error, parent folder with id ${normalizedParentId} is not a folder. Use listFiles to get valid folderIds`;
           }
 
-          resolvedParentId = parentId as Id<"files">;
+          resolvedParentId = normalizedParentId as Id<"files">;
         }
 
         try {
