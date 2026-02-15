@@ -10,7 +10,7 @@ const Page = async () => {
       <div className="flex w-full max-w-sm flex-col gap-6">
         <a href="/" className="flex items-center gap-2 self-center font-medium">
           <div className=" flex size-6 items-center justify-center rounded-md">
-            <Logo height={20} width={20} />
+            <Logo isDarkMode height={20} width={20} />
           </div>
           Synth
         </a>

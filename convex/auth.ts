@@ -6,16 +6,27 @@ import authConfig from "./auth.config";
 import { components } from "./_generated/api";
 import { betterAuth } from "better-auth/minimal";
 import { DataModel } from "./_generated/dataModel";
-import { MutationCtx, query, QueryCtx } from "./_generated/server";
-
-const siteUrl = process.env.SITE_URL!;
+import { MutationCtx, QueryCtx } from "./_generated/server";
 
 export const authComponent = createClient<DataModel>(components.betterAuth);
 
 export const createAuth = (ctx: GenericCtx<DataModel>) => {
+  const siteUrl =
+    process.env.SITE_URL ??
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    process.env.CONVEX_SITE_URL;
+  const githubClientId = process.env.GITHUB_CLIENT_ID;
+  const githubClientSecret = process.env.GITHUB_CLIENT_SECRET;
+
   return betterAuth({
     baseURL: siteUrl,
     database: authComponent.adapter(ctx),
+    socialProviders: {
+      github: {
+        clientId: githubClientId!,
+        clientSecret: githubClientSecret!,
+      },
+    },
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
