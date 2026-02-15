@@ -1,4 +1,4 @@
-import { ConvexError } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { convex } from "@convex-dev/better-auth/plugins";
 import { createClient, type GenericCtx } from "@convex-dev/better-auth";
 
@@ -6,7 +6,7 @@ import authConfig from "./auth.config";
 import { components } from "./_generated/api";
 import { betterAuth } from "better-auth/minimal";
 import { DataModel } from "./_generated/dataModel";
-import { MutationCtx, QueryCtx } from "./_generated/server";
+import { MutationCtx, query, QueryCtx } from "./_generated/server";
 
 export const authComponent = createClient<DataModel>(components.betterAuth);
 
@@ -49,3 +49,37 @@ export const validateInternalKey = (key: string) => {
 
   if (key !== internalKey) throw new ConvexError("Invalid Internal Key");
 };
+
+export const getCurrentUser = query({
+  args: {},
+  handler: async (ctx) => {
+    const [identity, authUser] = await Promise.all([
+      ctx.auth.getUserIdentity(),
+      authComponent.getAuthUser(ctx),
+    ]);
+
+    if (!identity || !authUser) {
+      throw new ConvexError("User not authenticated");
+    }
+
+    return {
+      authUser,
+      identity,
+    };
+  },
+});
+
+export const getUserAccount = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    return ctx.runQuery(components.betterAuth.adapter.findOne, {
+      model: "account",
+      where: [
+        {
+          field: "id",
+          value: args.userId,
+        },
+      ],
+    });
+  },
+});

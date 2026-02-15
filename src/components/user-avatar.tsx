@@ -27,7 +27,7 @@ export function UserAvatar({ isDarkMode }: { isDarkMode?: boolean }) {
   };
 
   if (session.isPending) {
-    <UserAvatarSkeleton isDarkMode={isDarkMode} />;
+    <UserAvatarSkeleton />;
   }
 
   return (
@@ -59,11 +59,11 @@ export function UserAvatar({ isDarkMode }: { isDarkMode?: boolean }) {
   );
 }
 
-const UserAvatarSkeleton = ({ isDarkMode }: { isDarkMode?: boolean }) => {
+const UserAvatarSkeleton = () => {
   return (
     <div
       className={cn(
-        "flex h-9 w-9 items-center justify-center rounded-md border"
+        "flex h-9 w-9 items-center justify-center rounded-md border",
       )}
     >
       <Skeleton className="h-5 w-5 rounded-full" />
