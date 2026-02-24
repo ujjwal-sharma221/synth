@@ -12,10 +12,12 @@ import { ProjectList } from "./ui/project-list";
 import { cn, generateUniqueName } from "@/lib/utils";
 import { useCreateProject } from "../hooks/use-project";
 import { ProjectCommandDialog } from "./ui/command-dialog";
+import { ImportGithubDialog } from "./import-github-dialog";
 
 export function ProjectView() {
   const [isLoading, setIsLoading] = useState(false);
   const [isCommandDialogOpen, setIsCommandDialogOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
 
   const createProject = useCreateProject();
 
@@ -43,6 +45,11 @@ export function ProjectView() {
           e.preventDefault();
           setIsCommandDialogOpen(true);
         }
+
+        if (e.key === "i") {
+          e.preventDefault();
+          setIsImportDialogOpen(true);
+        }
       }
     };
 
@@ -55,6 +62,11 @@ export function ProjectView() {
       <ProjectCommandDialog
         onOpenChange={setIsCommandDialogOpen}
         open={isCommandDialogOpen}
+      />
+
+      <ImportGithubDialog
+        onOpenChange={setIsImportDialogOpen}
+        open={isImportDialogOpen}
       />
 
       <div className="min-h-screen bg-sidebar flex flex-col items-center justify-center p-6 md:p-16">
@@ -89,6 +101,7 @@ export function ProjectView() {
 
               <Button
                 disabled={isLoading}
+                onClick={() => setIsImportDialogOpen(true)}
                 variant="outline"
                 className="h-full items-start justify-start p-4 bg-background border flex flex-col gap-6 rounded-none"
               >

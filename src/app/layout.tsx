@@ -1,8 +1,10 @@
 import { Toaster } from "sonner";
+
 import type { Metadata } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
 
 import "./globals.css";
+import "goey-toast/styles.css";
 import { Provider } from "@/providers/providers";
 import { convexBetterAuthNextJs } from "@convex-dev/better-auth/nextjs";
 

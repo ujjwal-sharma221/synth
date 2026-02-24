@@ -2,13 +2,15 @@ import { z } from "zod/v4";
 import { NextResponse } from "next/server";
 import { inngest } from "@/inngest/client";
 
-import { parseGithubUrl } from "@/lib/utils";
-import { convexClient } from "@/lib/convex-client";
 import { fetchAuthQuery, isAuthenticated } from "@/lib/auth-server";
 import { api } from "../../../../../convex/_generated/api";
+import { Id } from "../../../../../convex/_generated/dataModel";
 
 const requestSchema = z.object({
-  url: z.url(),
+  projectId: z.string(),
+  repoName: z.string().min(1),
+  visibility: z.enum(["public", "private"]).default("private"),
+  description: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -18,9 +20,8 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { url } = requestSchema.parse(body);
-
-  const { owner, repo } = parseGithubUrl(url);
+  const { projectId, visibility, description, repoName } =
+    requestSchema.parse(body);
 
   const { authUser } = await fetchAuthQuery(api.auth.getCurrentUser, {});
   const loggedInUserId = authUser._id;
@@ -31,7 +32,6 @@ export async function POST(request: Request) {
   });
 
   const githubToken = account?.accessToken;
-  console.log("GITHUB_TOKEN", githubToken);
 
   if (!githubToken) {
     return NextResponse.json(
@@ -52,21 +52,17 @@ export async function POST(request: Request) {
     );
   }
 
-  const projectId = await convexClient.mutation(api.system.createProject, {
-    internalKey,
-    name: repo,
-    ownerId: loggedInUserId,
-  });
-
-  await inngest.send({
-    name: "github/import.repo",
+  inngest.send({
+    name: "github/export.repo",
     data: {
-      owner,
-      repo,
-      projectId,
+      projectId: projectId as Id<"projects">,
+      repoName,
+      visibility,
+      description,
       githubToken,
+      internalKey,
     },
   });
 
-  return NextResponse.json({ success: true, projectId }, { status: 200 });
+  return NextResponse.json({ success: true }, { status: 200 });
 }

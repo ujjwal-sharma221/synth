@@ -21,3 +21,10 @@ export function generateUniqueName() {
 
   return name;
 }
+
+export function parseGithubUrl(url: string) {
+  const match = url.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)(\/.*)?$/);
+  if (!match) throw new Error("Invalid github url");
+
+  return { owner: match[1], repo: match[2].replace(/\.git$/, "") };
+}

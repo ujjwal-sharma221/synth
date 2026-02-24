@@ -516,7 +516,7 @@ export const getProjectFilesWithUrls = query({
           return { storageUrl: url, ...file };
         }
 
-        return { storageUrl: null, ...files };
+        return { storageUrl: null, ...file };
       }),
     );
   },

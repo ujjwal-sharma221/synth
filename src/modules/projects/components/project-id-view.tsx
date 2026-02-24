@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Allotment } from "allotment";
-import { ShareIcon } from "lucide-react";
 
 import {
   DEFAULT_MAIN_SIZE,
@@ -11,12 +10,13 @@ import {
   MIN_SIDEBAR_WIDTH,
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { PreviewView } from "./preview-view";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { FileExplorer } from "./file-explorer/file-explorer";
+import { ExportGithubPopover } from "./export-github-popover";
 import { EditorView } from "@/modules/editor/components/editor-view";
 
 import "allotment/dist/style.css";
-import { PreviewView } from "./preview-view";
 
 export function ProjectIdView({ projectId }: { projectId: Id<"projects"> }) {
   const [activeTab, setActiveTab] = useState<"editor" | "preview">("editor");
@@ -36,10 +36,7 @@ export function ProjectIdView({ projectId }: { projectId: Id<"projects"> }) {
         />
 
         <div className="flex-1 flex justify-end h-full">
-          <div className="flex items-center px-3 cursor-pointer h-full gap-1.5 border-l border-border hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-muted-foreground transition-colors group">
-            <ShareIcon className="size-3.5 group-hover:text-sidebar-accent-foreground" />
-            <span className="text-xs font-medium">Export to Github</span>
-          </div>
+          <ExportGithubPopover projectId={projectId} />
         </div>
       </nav>
 

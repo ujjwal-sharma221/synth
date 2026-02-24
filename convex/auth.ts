@@ -70,14 +70,18 @@ export const getCurrentUser = query({
 });
 
 export const getUserAccount = query({
-  args: { userId: v.string() },
+  args: { userId: v.string(), providerId: v.string() },
   handler: async (ctx, args) => {
     return ctx.runQuery(components.betterAuth.adapter.findOne, {
       model: "account",
       where: [
         {
-          field: "id",
+          field: "userId",
           value: args.userId,
+        },
+        {
+          field: "providerId",
+          value: args.providerId,
         },
       ],
     });
