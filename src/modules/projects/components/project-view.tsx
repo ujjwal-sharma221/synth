@@ -5,38 +5,19 @@ import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { CommandIcon, SparkleIcon } from "lucide-react";
 
+import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
 import { Kbd } from "@/components/ui/kbd";
 import { Button } from "@/components/ui/button";
 import { ProjectList } from "./ui/project-list";
-import { cn, generateUniqueName } from "@/lib/utils";
-import { useCreateProject } from "../hooks/use-project";
+import { NewProjectDialog } from "./new-project-dialog";
 import { ProjectCommandDialog } from "./ui/command-dialog";
 import { ImportGithubDialog } from "./import-github-dialog";
 
 export function ProjectView() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isCommandDialogOpen, setIsCommandDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-
-  const createProject = useCreateProject();
-
-  const handleCreateProject = async () => {
-    const toastId = toast.loading("Creating a new Project");
-
-    try {
-      setIsLoading(true);
-      await createProject({
-        name: generateUniqueName(),
-      });
-      toast.success("Project created successfully");
-    } catch {
-      toast.error("Something went wrong");
-    } finally {
-      toast.dismiss(toastId);
-      setIsLoading(false);
-    }
-  };
+  const [isCommandDialogOpen, setIsCommandDialogOpen] = useState(false);
+  const [isNewProjectDialog, setIsNewProjectDialogOpen] = useState(false);
 
   useEffect(() => {
     const handleKeyboardEvent = (e: KeyboardEvent) => {
@@ -49,6 +30,11 @@ export function ProjectView() {
         if (e.key === "i") {
           e.preventDefault();
           setIsImportDialogOpen(true);
+        }
+
+        if (e.key === "j") {
+          e.preventDefault();
+          setIsNewProjectDialogOpen(true);
         }
       }
     };
@@ -69,6 +55,11 @@ export function ProjectView() {
         open={isImportDialogOpen}
       />
 
+      <NewProjectDialog
+        onOpenChange={setIsNewProjectDialogOpen}
+        open={isNewProjectDialog}
+      />
+
       <div className="min-h-screen bg-sidebar flex flex-col items-center justify-center p-6 md:p-16">
         <div className="max-w-sm w-full mx-auto flex flex-col gap-4 items-center">
           <div className="flex justify-between gap-4 w-full items-center">
@@ -84,8 +75,7 @@ export function ProjectView() {
             <div className="grid grid-cols-2 gap-2">
               <Button
                 variant="outline"
-                onClick={handleCreateProject}
-                disabled={isLoading}
+                onClick={() => setIsNewProjectDialogOpen(true)}
                 className="h-full items-start justify-start p-4 bg-background border flex flex-col gap-6 rounded-none"
               >
                 <div className="flex items-center justify-between w-full">
@@ -100,7 +90,6 @@ export function ProjectView() {
               </Button>
 
               <Button
-                disabled={isLoading}
                 onClick={() => setIsImportDialogOpen(true)}
                 variant="outline"
                 className="h-full items-start justify-start p-4 bg-background border flex flex-col gap-6 rounded-none"

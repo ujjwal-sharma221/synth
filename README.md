@@ -1,36 +1,134 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Synth
+
+A minimal, web-based code editor for building with AI. Synth pairs an in-browser coding workspace with an AI agent that can read, create, edit, and manage project files through natural conversation.
+
+## Features
+
+- **AI Coding Agent** — Chat with an AI assistant that has full access to your project files. It can create, update, rename, and delete files based on your instructions.
+- **In-Browser Preview** — Projects run live inside a [WebContainer](https://webcontainers.io/), with a built-in terminal and instant preview — no local setup required.
+- **Code Editor** — CodeMirror-based editor with syntax highlighting for JavaScript, TypeScript, HTML, CSS, JSON, Python, and Markdown. Includes minimap, AI-powered inline suggestions, and quick edit.
+- **GitHub Integration** — Import existing repositories and export projects back to GitHub as new repos.
+- **Project Management** — Create, organize, and switch between multiple projects. Each project has its own file tree, conversations, and settings.
+- **Authentication** — GitHub OAuth sign-in via better-auth.
+
+## Tech Stack
+
+- **Framework** — [Next.js 16](https://nextjs.org/) (App Router, React Compiler)
+- **Language** — TypeScript
+- **Database & Backend** — [Convex](https://convex.dev/)
+- **Background Jobs & AI Orchestration** — [Inngest](https://inngest.com/) + [Inngest Agent Kit](https://agentkit.inngest.com/)
+- **AI Models** — Groq, Google AI, Cerebras (via [Vercel AI SDK](https://sdk.vercel.ai/))
+- **In-Browser Runtime** — [WebContainer API](https://webcontainers.io/)
+- **Editor** — [CodeMirror 6](https://codemirror.net/)
+- **UI** — [Tailwind CSS 4](https://tailwindcss.com/), [shadcn/ui](https://ui.shadcn.com/), [Radix UI](https://radix-ui.com/), [Motion](https://motion.dev/)
+- **Auth** — [better-auth](https://better-auth.com/) with Convex adapter
+- **Package Manager** — pnpm
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20+
+- pnpm
+- A [Convex](https://convex.dev/) account
+- API keys for Groq, Google AI, and/or Cerebras
+- A [GitHub OAuth App](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app) for authentication
+- (Optional) [Firecrawl](https://firecrawl.dev/) API key
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <your-repo-url>
+cd synth
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment Variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create a `.env.local` file in the project root:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+# Convex
+CONVEX_DEPLOYMENT=<your-convex-deployment>
+NEXT_PUBLIC_CONVEX_URL=<your-convex-url>
+NEXT_PUBLIC_CONVEX_SITE_URL=<your-convex-site-url>
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+CONVEX_INTERNAL_KEY=<your-convex-internal-key>
 
-## Learn More
+# AI Providers
+GOOGLE_API_KEY=<your-google-api-key>
+CEREBRAS_API_KEY=<your-cerebras-api-key>
+GROQ_API_KEY=<your-groq-api-key>
 
-To learn more about Next.js, take a look at the following resources:
+# Firecrawl (optional)
+FIRECRAWL_API_KEY=<your-firecrawl-api-key>
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# GitHub OAuth
+GITHUB_CLIENT_ID=<your-github-client-id>
+GITHUB_CLIENT_SECRET=<your-github-client-secret>
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Running Locally
 
-## Deploy on Vercel
+Start all services (Next.js dev server, Convex, and Inngest) concurrently:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm dev:all
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Or run them individually:
+
+```bash
+# Next.js
+pnpm dev
+
+# Convex (in a separate terminal)
+pnpx convex dev
+
+# Inngest (in a separate terminal)
+pnpm dlx inngest-cli@latest dev
+```
+
+The app will be available at [http://localhost:3000](http://localhost:3000).
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages and API routes
+│   ├── api/                # API routes (messages, auth, GitHub, suggestions, quick-edit)
+│   ├── (auth)/             # Sign-in / Sign-up pages
+│   └── (projects)/         # Project dashboard and individual project views
+├── components/             # Shared components (UI primitives, AI elements)
+├── inngest/                # Inngest client setup
+├── lib/                    # Utilities (auth, Convex client, Firecrawl)
+├── modules/
+│   ├── auth/               # Authentication screens and forms
+│   ├── conversations/      # AI chat — message processing, agent tools, UI
+│   ├── editor/             # CodeMirror editor — extensions, themes, suggestions
+│   ├── preview/            # WebContainer preview, terminal output
+│   └── projects/           # Project CRUD, file explorer, GitHub import/export
+└── providers/              # React context providers (theme, Convex)
+
+convex/
+├── schema.ts               # Database schema (projects, files, conversations, messages)
+├── projects.ts             # Project queries and mutations
+├── conversations.ts        # Conversation queries and mutations
+├── files.ts                # File queries and mutations
+├── auth.ts                 # Auth helpers
+└── http.ts                 # HTTP endpoints
+```
+
+## Scripts
+
+| Command        | Description                                     |
+| -------------- | ----------------------------------------------- |
+| `pnpm dev`     | Start Next.js dev server                        |
+| `pnpm dev:all` | Start Next.js, Convex, and Inngest concurrently |
+| `pnpm build`   | Production build                                |
+| `pnpm start`   | Start production server                         |
+| `pnpm lint`    | Run ESLint                                      |
+
+## License
+
+Private.

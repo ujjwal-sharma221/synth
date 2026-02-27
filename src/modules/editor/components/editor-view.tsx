@@ -8,6 +8,7 @@ import { TopNavigation } from "./ui/top-navigation";
 import { FileBreadCrumbs } from "./ui/file-breadcrumbs";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useGetFile, useUpdateFile } from "@/modules/projects/hooks/use-files";
+import { AlertCircleIcon } from "lucide-react";
 
 export function EditorView({ projectId }: { projectId: Id<"projects"> }) {
   const { activeTabId } = useEditor(projectId);
@@ -15,7 +16,7 @@ export function EditorView({ projectId }: { projectId: Id<"projects"> }) {
   const updateFile = useUpdateFile();
   const timeOutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const isActiveBinary = activeFile && activeFile.storageId;
+  const isActiveFileBinary = activeFile && activeFile.storageId;
   const isActiveTextFile = activeFile && !activeFile.storageId;
 
   useEffect(() => {
@@ -55,6 +56,15 @@ export function EditorView({ projectId }: { projectId: Id<"projects"> }) {
               }, DEBOUNCE_TIME_MS);
             }}
           />
+        )}
+
+        {isActiveFileBinary && (
+          <div className="size-full flex items-center justify-center">
+            <div className="flex flex-col items-center gap-2.5 max-w-md text-center">
+              <AlertCircleIcon className="size-10 text-amber-300" />
+              <p>This file is an unsupported text encoding or a binary file</p>
+            </div>
+          </div>
         )}
       </div>
     </div>
