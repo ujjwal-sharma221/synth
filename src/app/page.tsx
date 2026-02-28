@@ -1,4 +1,6 @@
 import { Logo } from "@/components/logo";
+import { redirect } from "next/navigation";
+import { checkUserAuthentication } from "@/modules/auth/functions";
 
 const EDITOR_LINES: { indent?: number; tokens: [string, string][] }[] = [
   {
@@ -128,7 +130,13 @@ const CHANGESET_LINES = [
   "+ src/lib/metrics.ts",
 ];
 
-export default function Home() {
+export default async function Home() {
+  const user = await checkUserAuthentication();
+
+  if (user) {
+    redirect("/projects");
+  }
+
   return (
     <div className="min-h-screen w-full bg-[#0b0c10] text-[#f1f1f1]">
       <header className="sticky top-0 z-20 border-b border-white/10 bg-[#0b0c10]/90 backdrop-blur">

@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import ky, { HTTPError } from "ky";
 import { useForm } from "@tanstack/react-form";
+import { authClient } from "@/lib/auth-client";
 
 import {
   Select,
@@ -57,6 +58,21 @@ export function ExportGithubPopover({ projectId }: ExportGithubPopoverProps) {
   const exportStatus = project?.exportStatus;
   const exportRepoUrl = project?.exportRepoUrl;
 
+  const promptGithubLogin = async () => {
+    const shouldConnectGithub = window.confirm(
+      "GitHub account is not connected. Connect GitHub now?",
+    );
+
+    if (!shouldConnectGithub) return;
+
+    await authClient.signIn.social({
+      provider: "github",
+      scopes: ["read:user", "user:email", "repo"],
+      callbackURL: window.location.pathname,
+      errorCallbackURL: window.location.pathname,
+    });
+  };
+
   const form = useForm({
     validators: {
       onSubmit: formSchema,
@@ -80,9 +96,13 @@ export function ExportGithubPopover({ projectId }: ExportGithubPopoverProps) {
         toast.success("Exporting project");
       } catch (e) {
         if (e instanceof HTTPError) {
-          const body = await e.response.json<{ error: string }>();
-          if (body.error.includes("Github token is required")) {
-            toast.error("Github account not connected");
+          const body = await e.response.json<{ error: string; code?: string }>();
+          if (
+            body.code === "GITHUB_AUTH_REQUIRED" ||
+            body.error.includes("Github token is required")
+          ) {
+            toast.error("GitHub login required to continue");
+            await promptGithubLogin();
           }
 
           setOpen(false);

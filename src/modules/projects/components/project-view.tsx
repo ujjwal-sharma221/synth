@@ -3,10 +3,11 @@
 import Image from "next/image";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
-import { CommandIcon, SparkleIcon } from "lucide-react";
+import { CommandIcon, LogOutIcon, SparkleIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
+import { authClient } from "@/lib/auth-client";
 import { Kbd } from "@/components/ui/kbd";
 import { Button } from "@/components/ui/button";
 import { ProjectList } from "./ui/project-list";
@@ -18,6 +19,19 @@ export function ProjectView() {
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isCommandDialogOpen, setIsCommandDialogOpen] = useState(false);
   const [isNewProjectDialog, setIsNewProjectDialogOpen] = useState(false);
+
+  const handleLogout = () => {
+    authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          window.location.href = "/sign-in";
+        },
+        onError: () => {
+          toast.error("Unable to log out. Please try again.");
+        },
+      },
+    });
+  };
 
   useEffect(() => {
     const handleKeyboardEvent = (e: KeyboardEvent) => {
@@ -69,6 +83,10 @@ export function ProjectView() {
                 Synth
               </h1>
             </div>
+            <Button onClick={handleLogout} size="sm" variant="outline">
+              <LogOutIcon className="size-4" />
+              Logout
+            </Button>
           </div>
 
           <div className="flex flex-col gap-4 w-full">

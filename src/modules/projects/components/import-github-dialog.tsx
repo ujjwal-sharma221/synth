@@ -2,6 +2,7 @@ import { z } from "zod/v4";
 import ky, { HTTPError } from "ky";
 import { useRouter } from "next/navigation";
 import { useForm } from "@tanstack/react-form";
+import { authClient } from "@/lib/auth-client";
 
 import {
   Field,
@@ -37,6 +38,21 @@ export function ImportGithubDialog({
 }: ImportGithubDialogProps) {
   const router = useRouter();
 
+  const promptGithubLogin = async () => {
+    const shouldConnectGithub = window.confirm(
+      "GitHub account is not connected. Connect GitHub now?",
+    );
+
+    if (!shouldConnectGithub) return;
+
+    await authClient.signIn.social({
+      provider: "github",
+      scopes: ["read:user", "user:email", "repo"],
+      callbackURL: window.location.pathname,
+      errorCallbackURL: window.location.pathname,
+    });
+  };
+
   const form = useForm({
     validators: {
       onSubmit: formSchema,
@@ -59,9 +75,13 @@ export function ImportGithubDialog({
         router.push(`projects/${projectId}`);
       } catch (e) {
         if (e instanceof HTTPError) {
-          const body = await e.response.json<{ error: string }>();
-          if (body.error.includes("Github token is required")) {
-            toast.error("Github account not connected");
+          const body = await e.response.json<{ error: string; code?: string }>();
+          if (
+            body.code === "GITHUB_AUTH_REQUIRED" ||
+            body.error.includes("Github token is required")
+          ) {
+            toast.error("GitHub login required to continue");
+            await promptGithubLogin();
           }
 
           onOpenChange(false);

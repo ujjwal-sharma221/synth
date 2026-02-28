@@ -3,16 +3,14 @@ import { isAuthenticated } from "@/lib/auth-server";
 
 export const ensureAuthenticated = async () => {
   const user = await isAuthenticated();
-  console.log(user);
 
   if (!user) redirect("/");
 };
 
 export const ensureUnauthenticated = async () => {
   const user = await isAuthenticated();
-  console.log(user);
 
-  if (user) redirect("/");
+  if (user) redirect("/projects");
 };
 
 export const checkUserAuthentication = async () => {

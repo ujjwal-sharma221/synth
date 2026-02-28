@@ -36,6 +36,7 @@ export async function POST(request: Request) {
   if (!githubToken) {
     return NextResponse.json(
       {
+        code: "GITHUB_AUTH_REQUIRED",
         error: "Github token is required, please reconnect your github account",
       },
       { status: 400 },
